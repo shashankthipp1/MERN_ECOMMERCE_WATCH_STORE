@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import apiClient from '../config/api';
 import { toast } from 'react-toastify';
 import { useAuth } from './AuthContext';
 
@@ -70,7 +70,7 @@ export const CartProvider = ({ children }) => {
 
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
-      const response = await axios.get('/api/cart');
+      const response = await apiClient.get('/api/cart');
       dispatch({
         type: 'SET_CART',
         payload: {
@@ -103,7 +103,7 @@ export const CartProvider = ({ children }) => {
 
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
-      const response = await axios.post('/api/cart/add', {
+      const response = await apiClient.post('/api/cart/add', {
         productId,
         quantity
       });
@@ -132,7 +132,7 @@ export const CartProvider = ({ children }) => {
 
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
-      const response = await axios.put('/api/cart/update', {
+      const response = await apiClient.put('/api/cart/update', {
         productId,
         quantity
       });
@@ -160,7 +160,7 @@ export const CartProvider = ({ children }) => {
 
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
-      const response = await axios.delete(`/api/cart/remove/${productId}`);
+      const response = await apiClient.delete(`/api/cart/remove/${productId}`);
       dispatch({
         type: 'REMOVE_FROM_CART',
         payload: {
@@ -186,7 +186,7 @@ export const CartProvider = ({ children }) => {
 
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
-      await axios.delete('/api/cart/clear');
+      await apiClient.delete('/api/cart/clear');
       dispatch({ type: 'CLEAR_CART' });
       toast.success('Cart cleared!');
       return { success: true };

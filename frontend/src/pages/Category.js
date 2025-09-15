@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
+import apiClient from '../config/api';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -28,7 +28,7 @@ const Category = () => {
         params.append('search', searchTerm);
       }
 
-      const response = await axios.get(`/api/products?${params}`);
+      const response = await apiClient.get(`/api/products?${params}`);
       setProducts(response.data.products);
       setTotalPages(response.data.pagination.totalPages);
     } catch (error) {

@@ -104,8 +104,8 @@ const Navbar = () => {
               <div className="relative">
                 <div className="flex items-center space-x-3">
                   <div className="text-right">
-                    <p className="text-sm font-semibold text-slate-900">{user.name}</p>
-                    <p className="text-xs text-slate-500 capitalize">{user.role}</p>
+                    <p className="text-sm font-semibold text-slate-900">{user?.name || 'User'}</p>
+                    <p className="text-xs text-slate-500 capitalize">{user?.role || 'user'}</p>
                   </div>
                   <div className="relative">
                     <button
@@ -139,7 +139,7 @@ const Navbar = () => {
                           </svg>
                           Orders
                         </Link>
-                        {user.role === 'admin' && (
+                        {user?.role === 'admin' && (
                           <Link
                             to="/admin"
                             className="flex items-center px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-200"
@@ -152,7 +152,7 @@ const Navbar = () => {
                             Admin Panel
                           </Link>
                         )}
-                        {user.role === 'delivery' && (
+                        {user?.role === 'deliveryBoy' && (
                           <Link
                             to="/delivery"
                             className="flex items-center px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-200"

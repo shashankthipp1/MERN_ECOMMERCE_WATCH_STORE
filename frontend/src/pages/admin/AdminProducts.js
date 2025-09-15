@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import apiClient from '../../config/api';
 
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
@@ -38,7 +38,7 @@ const AdminProducts = () => {
         params.append('category', categoryFilter);
       }
 
-      const response = await axios.get(`/api/products/admin/all?${params}`);
+      const response = await apiClient.get(`/api/products/admin/all?${params}`);
       setProducts(response.data.products);
       setTotalPages(response.data.pagination.totalPages);
     } catch (error) {
@@ -79,9 +79,9 @@ const AdminProducts = () => {
       };
 
       if (editingProduct) {
-        await axios.put(`/api/products/${editingProduct._id}`, productData);
+        await apiClient.put(`/api/products/${editingProduct._id}`, productData);
       } else {
-        await axios.post('/api/products', productData);
+        await apiClient.post('/api/products', productData);
       }
 
       setShowAddModal(false);
@@ -111,7 +111,7 @@ const AdminProducts = () => {
   const handleDelete = async (productId) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
-        await axios.delete(`/api/products/${productId}`);
+        await apiClient.delete(`/api/products/${productId}`);
         fetchProducts();
       } catch (error) {
         console.error('Error deleting product:', error);

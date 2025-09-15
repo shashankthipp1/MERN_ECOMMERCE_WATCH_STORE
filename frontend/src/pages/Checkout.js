@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import apiClient from '../config/api';
 import { useCart } from '../contexts/CartContext';
 
 const Checkout = () => {
@@ -45,7 +45,7 @@ const Checkout = () => {
         notes: formData.notes
       };
 
-      const response = await axios.post('/api/orders', orderData);
+      const response = await apiClient.post('/api/orders', orderData);
       
       // Clear cart after successful order
       await clearCart();

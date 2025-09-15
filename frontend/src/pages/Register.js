@@ -36,7 +36,24 @@ const Register = () => {
       const { confirmPassword, ...registerData } = formData;
       const result = await register(registerData);
       if (result.success) {
-        navigate('/');
+        // Redirect based on user role
+        const userRole = registerData.role;
+        let redirectPath = '/';
+        
+        switch (userRole) {
+          case 'admin':
+            redirectPath = '/admin';
+            break;
+          case 'deliveryBoy':
+            redirectPath = '/delivery';
+            break;
+          case 'user':
+          default:
+            redirectPath = '/';
+            break;
+        }
+        
+        navigate(redirectPath);
       }
     } catch (error) {
       console.error('Registration error:', error);
@@ -108,6 +125,7 @@ const Register = () => {
               >
                 <option value="user">Customer</option>
                 <option value="deliveryBoy">Delivery Boy</option>
+                <option value="admin">Admin</option>
               </select>
             </div>
             <div>

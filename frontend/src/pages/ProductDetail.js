@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
+import apiClient from '../config/api';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -16,7 +16,7 @@ const ProductDetail = () => {
   const fetchProduct = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`/api/products/${id}`);
+      const response = await apiClient.get(`/api/products/${id}`);
       setProduct(response.data);
     } catch (error) {
       console.error('Error fetching product:', error);

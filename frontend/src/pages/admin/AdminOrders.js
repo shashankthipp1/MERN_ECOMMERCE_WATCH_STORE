@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import apiClient from '../../config/api';
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -26,11 +26,14 @@ const AdminOrders = () => {
         params.append('deliveryBoy', deliveryBoyFilter);
       }
 
-      const response = await axios.get(`/api/orders/admin/all?${params}`);
-      setOrders(response.data.orders);
-      setTotalPages(response.data.pagination.totalPages);
+      const response = await apiClient.get(`/api/orders/admin/all?${params}`);
+      setOrders(response.data?.orders || []);
+      setTotalPages(response.data?.pagination?.totalPages || 1);
     } catch (error) {
       console.error('Error fetching orders:', error);
+      // Set default values on error
+      setOrders([]);
+      setTotalPages(1);
     } finally {
       setLoading(false);
     }
@@ -38,10 +41,12 @@ const AdminOrders = () => {
 
   const fetchDeliveryBoys = useCallback(async () => {
     try {
-      const response = await axios.get('/api/orders/delivery/boys');
-      setDeliveryBoys(response.data);
+      const response = await apiClient.get('/api/orders/delivery/boys');
+      setDeliveryBoys(response.data || []);
     } catch (error) {
       console.error('Error fetching delivery boys:', error);
+      // Set default values on error
+      setDeliveryBoys([]);
     }
   }, []);
 
@@ -53,7 +58,7 @@ const AdminOrders = () => {
 
   const handleAssignDeliveryBoy = async (orderId, deliveryBoyId) => {
     try {
-      await axios.put(`/api/orders/${orderId}/assign`, {
+      await apiClient.put(`/api/orders/${orderId}/assign`, {
         deliveryBoyId
       });
       fetchOrders();
@@ -64,7 +69,7 @@ const AdminOrders = () => {
 
   const handleUpdateStatus = async (orderId, status) => {
     try {
-      await axios.put(`/api/orders/${orderId}/status`, {
+      await apiClient.put(`/api/orders/${orderId}/status`, {
         status
       });
       fetchOrders();
@@ -204,10 +209,10 @@ const AdminOrders = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
                         <div className="text-sm font-medium text-gray-900">
-                          {order.user.name}
+                          {order.user?.name || 'Unknown User'}
                         </div>
                         <div className="text-sm text-gray-500">
-                          {order.user.email}
+                          {order.user?.email || 'No email'}
                         </div>
                       </div>
                     </td>
@@ -226,10 +231,10 @@ const AdminOrders = () => {
                       {order.assignedDeliveryBoy ? (
                         <div>
                           <div className="text-sm font-medium text-gray-900">
-                            {order.assignedDeliveryBoy.name}
+                            {order.assignedDeliveryBoy?.name || 'Unknown'}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {order.assignedDeliveryBoy.phone}
+                            {order.assignedDeliveryBoy?.phone || 'No phone'}
                           </div>
                         </div>
                       ) : (

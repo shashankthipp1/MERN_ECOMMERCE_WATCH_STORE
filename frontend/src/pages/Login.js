@@ -29,7 +29,26 @@ const Login = () => {
     try {
       const result = await login(formData.email, formData.password);
       if (result.success) {
-        navigate(from, { replace: true });
+        // Redirect based on user role
+        const userRole = result.user.role;
+        let redirectPath = from;
+        
+        if (from === '/' || from === '/login') {
+          switch (userRole) {
+            case 'admin':
+              redirectPath = '/admin';
+              break;
+            case 'deliveryBoy':
+              redirectPath = '/delivery';
+              break;
+            case 'user':
+            default:
+              redirectPath = '/';
+              break;
+          }
+        }
+        
+        navigate(redirectPath, { replace: true });
       }
     } catch (error) {
       console.error('Login error:', error);

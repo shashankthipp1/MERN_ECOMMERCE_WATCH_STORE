@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import apiClient from '../config/api';
 
 const Home = () => {
   const [categories, setCategories] = useState([]);
@@ -14,8 +14,8 @@ const Home = () => {
         // Add a small delay to prevent immediate API calls
         const timer = setTimeout(async () => {
           const [categoriesRes, productsRes] = await Promise.all([
-            axios.get('/api/products/categories'),
-            axios.get('/api/products?limit=6')
+            apiClient.get('/api/products/categories'),
+            apiClient.get('/api/products?limit=6')
           ]);
           
           // Extract category names from the API response objects

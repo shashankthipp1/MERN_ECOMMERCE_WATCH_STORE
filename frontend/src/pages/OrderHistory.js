@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import axios from 'axios';
+import apiClient from '../config/api';
 
 const OrderHistory = () => {
   const [orders, setOrders] = useState([]);
@@ -24,7 +24,7 @@ const OrderHistory = () => {
         params.append('status', statusFilter);
       }
 
-      const response = await axios.get(`/api/orders?${params}`);
+      const response = await apiClient.get(`/api/orders?${params}`);
       setOrders(response.data.orders);
       setTotalPages(response.data.pagination.totalPages);
     } catch (error) {

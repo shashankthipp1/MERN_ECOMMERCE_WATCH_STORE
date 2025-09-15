@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import apiClient from '../../config/api';
 import { useAuth } from '../../contexts/AuthContext';
 
 const DeliveryDashboard = () => {
@@ -23,11 +23,14 @@ const DeliveryDashboard = () => {
         params.append('status', statusFilter);
       }
 
-      const response = await axios.get(`/api/orders/delivery/assigned?${params}`);
-      setOrders(response.data.orders);
-      setTotalPages(response.data.pagination.totalPages);
+      const response = await apiClient.get(`/api/orders/delivery/assigned?${params}`);
+      setOrders(response.data?.orders || []);
+      setTotalPages(response.data?.pagination?.totalPages || 1);
     } catch (error) {
       console.error('Error fetching orders:', error);
+      // Set default values on error
+      setOrders([]);
+      setTotalPages(1);
     } finally {
       setLoading(false);
     }
@@ -40,12 +43,15 @@ const DeliveryDashboard = () => {
 
   const handleUpdateStatus = async (orderId, status) => {
     try {
-      await axios.put(`/api/orders/${orderId}/status`, {
+      await apiClient.put(`/api/orders/${orderId}/status`, {
         status
       });
       fetchOrders();
+      // Show success message
+      alert(`Order status updated to ${status} successfully!`);
     } catch (error) {
       console.error('Error updating order status:', error);
+      alert('Failed to update order status. Please try again.');
     }
   };
 
@@ -229,13 +235,13 @@ const DeliveryDashboard = () => {
                         <h4 className="text-sm font-medium text-gray-900 mb-3">Customer Information</h4>
                         <div className="space-y-2">
                           <p className="text-sm text-gray-600">
-                            <span className="font-medium">Name:</span> {order.user.name}
+                            <span className="font-medium">Name:</span> {order.user?.name || 'Unknown User'}
                           </p>
                           <p className="text-sm text-gray-600">
-                            <span className="font-medium">Phone:</span> {order.user.phone || 'Not provided'}
+                            <span className="font-medium">Phone:</span> {order.user?.phone || 'Not provided'}
                           </p>
                           <p className="text-sm text-gray-600">
-                            <span className="font-medium">Email:</span> {order.user.email}
+                            <span className="font-medium">Email:</span> {order.user?.email || 'No email'}
                           </p>
                         </div>
                       </div>
@@ -244,11 +250,11 @@ const DeliveryDashboard = () => {
                       <div>
                         <h4 className="text-sm font-medium text-gray-900 mb-3">Delivery Address</h4>
                         <div className="text-sm text-gray-600">
-                          <p>{order.shippingAddress.street}</p>
+                          <p>{order.shippingAddress?.street || 'No street address'}</p>
                           <p>
-                            {order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zipCode}
+                            {order.shippingAddress?.city || 'No city'}, {order.shippingAddress?.state || 'No state'} {order.shippingAddress?.zipCode || 'No zip'}
                           </p>
-                          <p>{order.shippingAddress.country}</p>
+                          <p>{order.shippingAddress?.country || 'No country'}</p>
                         </div>
                       </div>
                     </div>
@@ -257,23 +263,23 @@ const DeliveryDashboard = () => {
                     <div className="mt-6">
                       <h4 className="text-sm font-medium text-gray-900 mb-3">Order Items</h4>
                       <div className="space-y-2">
-                        {order.items.map((item, index) => (
+                        {order.items?.map((item, index) => (
                           <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
                             <img
-                              src={item.product.image}
-                              alt={item.product.name}
+                              src={item.product?.image || 'https://via.placeholder.com/48x48'}
+                              alt={item.product?.name || 'Product'}
                               className="w-12 h-12 object-cover rounded"
                             />
                             <div className="flex-1">
                               <p className="text-sm font-medium text-gray-900">
-                                {item.product.name}
+                                {item.product?.name || 'Unknown Product'}
                               </p>
                               <p className="text-sm text-gray-500">
-                                Qty: {item.quantity} × ₹{item.price}
+                                Qty: {item.quantity || 0} × ₹{item.price || 0}
                               </p>
                             </div>
                           </div>
-                        ))}
+                        )) || []}
                       </div>
                     </div>
 

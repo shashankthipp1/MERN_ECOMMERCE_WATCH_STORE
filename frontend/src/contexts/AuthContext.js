@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from '../config/api';
 import { toast } from 'react-toastify';
 
 const AuthContext = createContext();
@@ -49,28 +49,30 @@ const authReducer = (state, action) => {
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
-  // Set up axios interceptor for token
-  useEffect(() => {
-    if (state.token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${state.token}`;
-    } else {
-      delete axios.defaults.headers.common['Authorization'];
-    }
-  }, [state.token]);
+  // Token is now handled by the apiClient interceptor in config/api.js
+  // No need for manual axios configuration here
 
   // Check if user is logged in on app start
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem('token');
       if (token) {
-        // Set the token without making API call to avoid errors
-        dispatch({
-          type: 'LOGIN_SUCCESS',
-          payload: {
-            user: { id: 'temp', name: 'User', email: 'user@example.com', role: 'user' },
-            token: token
-          }
-        });
+        try {
+          // Fetch user data from API
+          const response = await apiClient.get('/api/auth/me');
+          dispatch({
+            type: 'LOGIN_SUCCESS',
+            payload: {
+              user: response.data.user,
+              token: token
+            }
+          });
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+          // Clear invalid token
+          localStorage.removeItem('token');
+          dispatch({ type: 'SET_LOADING', payload: false });
+        }
       } else {
         dispatch({ type: 'SET_LOADING', payload: false });
       }
@@ -81,13 +83,13 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post('/api/auth/login', { email, password });
+      const response = await apiClient.post('/api/auth/login', { email, password });
       dispatch({
         type: 'LOGIN_SUCCESS',
         payload: response.data
       });
       toast.success('Login successful!');
-      return { success: true };
+      return { success: true, user: response.data.user };
     } catch (error) {
       const message = error.response?.data?.message || 'Login failed';
       // Show error toast for actual login attempts
@@ -98,7 +100,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const response = await axios.post('/api/auth/register', userData);
+      const response = await apiClient.post('/api/auth/register', userData);
       dispatch({
         type: 'LOGIN_SUCCESS',
         payload: response.data
@@ -120,7 +122,7 @@ export const AuthProvider = ({ children }) => {
 
   const updateProfile = async (profileData) => {
     try {
-      const response = await axios.put('/api/auth/profile', profileData);
+      const response = await apiClient.put('/api/auth/profile', profileData);
       dispatch({
         type: 'UPDATE_USER',
         payload: response.data.user

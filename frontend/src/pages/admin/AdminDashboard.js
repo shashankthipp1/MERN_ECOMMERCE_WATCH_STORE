@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import apiClient from '../../config/api';
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -21,20 +21,20 @@ const AdminDashboard = () => {
       setLoading(true);
       
       // Fetch products count
-      const productsResponse = await axios.get('/api/products/admin/all?limit=1');
-      const totalProducts = productsResponse.data.pagination.totalProducts;
+      const productsResponse = await apiClient.get('/api/products/admin/all?limit=1');
+      const totalProducts = productsResponse.data?.pagination?.totalProducts || 0;
 
       // Fetch orders count
-      const ordersResponse = await axios.get('/api/orders/admin/all?limit=1');
-      const totalOrders = ordersResponse.data.pagination.totalOrders;
+      const ordersResponse = await apiClient.get('/api/orders/admin/all?limit=1');
+      const totalOrders = ordersResponse.data?.pagination?.totalOrders || 0;
 
       // Fetch pending orders
-      const pendingOrdersResponse = await axios.get('/api/orders/admin/all?status=Pending&limit=1');
-      const pendingOrders = pendingOrdersResponse.data.pagination.totalOrders;
+      const pendingOrdersResponse = await apiClient.get('/api/orders/admin/all?status=Pending&limit=1');
+      const pendingOrders = pendingOrdersResponse.data?.pagination?.totalOrders || 0;
 
       // Fetch recent orders
-      const recentOrdersResponse = await axios.get('/api/orders/admin/all?limit=5');
-      setRecentOrders(recentOrdersResponse.data.orders);
+      const recentOrdersResponse = await apiClient.get('/api/orders/admin/all?limit=5');
+      setRecentOrders(recentOrdersResponse.data?.orders || []);
 
       setStats({
         totalProducts,
@@ -44,6 +44,14 @@ const AdminDashboard = () => {
       });
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
+      // Set default values on error
+      setStats({
+        totalProducts: 0,
+        totalOrders: 0,
+        pendingOrders: 0,
+        totalUsers: 0
+      });
+      setRecentOrders([]);
     } finally {
       setLoading(false);
     }
@@ -166,7 +174,16 @@ const AdminDashboard = () => {
                 <svg className="w-5 h-5 text-gray-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                <span className="text-gray-900">Manage Orders</span>
+                <span className="text-gray-900">Manage Orders & Assign Delivery</span>
+              </Link>
+              <Link
+                to="/admin/orders?status=Pending"
+                className="flex items-center p-3 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors"
+              >
+                <svg className="w-5 h-5 text-yellow-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-gray-900">Pending Orders ({stats.pendingOrders})</span>
               </Link>
             </div>
           </div>
@@ -184,7 +201,7 @@ const AdminDashboard = () => {
                         Order #{order._id.slice(-8).toUpperCase()}
                       </p>
                       <p className="text-xs text-gray-500">
-                        {order.user.name} • {formatDate(order.orderDate)}
+                        {order.user?.name || 'Unknown User'} • {formatDate(order.orderDate)}
                       </p>
                     </div>
                     <div className="text-right">
